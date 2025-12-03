@@ -1,65 +1,136 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+
+type Game = {
+    team: string;
+    result: string;
+};
+
+type DayData = {
+    date: number;
+    month: number;
+    games: Game[];
+};
+
+function buildCalendar(year = 2025, monthIndex = 4) {
+    const firstDay = new Date(year, monthIndex, 1).getDay(); // 0=Sun
+    const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+
+    const weeks: (number | null)[][] = [];
+    let week = new Array(7).fill(null);
+
+    let day = 1;
+
+    // 最初の週
+    for (let i = firstDay; i < 7; i++) {
+        week[i] = day++;
+    }
+    weeks.push(week);
+
+    // 2週目以降
+    while (day <= daysInMonth) {
+        week = new Array(7).fill(null);
+        for (let i = 0; i < 7 && day <= daysInMonth; i++) {
+            week[i] = day++;
+        }
+        weeks.push(week);
+    }
+    return weeks;
+}
 
 export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    const [byDate, setByDate] = useState<Record<number, Game[]>>({});
+    const year = 2025;
+    const monthIndex = 4; // May
+
+    useEffect(() => {
+        async function load() {
+            const res = await fetch("/npb_data_202505.json");
+            const json: DayData[] = await res.json();
+
+            const map: Record<number, Game[]> = {};
+            for (const entry of json) {
+                if (entry.month === 5) {
+                    map[entry.date] = entry.games;
+                }
+            }
+            setByDate(map);
+        }
+        load();
+    }, []);
+
+    const weeks = buildCalendar(year, monthIndex);
+
+    return (
+        <div style={{ padding: 20, fontFamily: "system-ui" }}>
+            <h1>2025年5月 – NPB 試合カレンダー</h1>
+
+            <table
+                style={{ borderCollapse: "collapse", width: "100%", maxWidth: 900 }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+                <thead>
+                <tr>
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                        <th
+                            key={d}
+                            style={{
+                                padding: 8,
+                                border: "1px solid #ddd",
+                                textAlign: "center",
+                            }}
+                        >
+                            {d}
+                        </th>
+                    ))}
+                </tr>
+                </thead>
+
+                <tbody>
+                {weeks.map((week, wi) => (
+                    <tr key={wi}>
+                        {week.map((date, di) => (
+                            <td
+                                key={di}
+                                style={{
+                                    verticalAlign: "top",
+                                    border: "1px solid #eee",
+                                    minHeight: 120,
+                                    padding: 8,
+                                }}
+                            >
+                                {date && (
+                                    <>
+                                        <div style={{ fontWeight: "bold" }}>{date}日</div>
+
+                                        {/* 試合データ */}
+                                        <div style={{ fontSize: 13, marginTop: 6 }}>
+                                            {byDate[date] ? (
+                                                byDate[date].map((g, i) => (
+                                                    <div key={i} style={{ marginBottom: 4 }}>
+                              <span
+                                  style={{
+                                      display: "inline-block",
+                                      width: 120,
+                                  }}
+                              >
+                                {g.team}
+                              </span>
+                                                        <span>{g.result}</span>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div style={{ color: "#999" }}>試合なし</div>
+                                            )}
+                                        </div>
+                                    </>
+                                )}
+                            </td>
+                        ))}
+                    </tr>
+                ))}
+                </tbody>
+            </table>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+    );
 }
