@@ -13,21 +13,32 @@ type DayData = {
     games: Game[];
 };
 
-// チームカラーマッピング
-const TEAM_COLORS: Record<string, { bg: string; text: string; name: string }> = {
-    "巨": { bg: "#FF6600", text: "#FFFFFF", name: "巨人" },
-    "神": { bg: "#FFE500", text: "#000000", name: "阪神" },
-    "広": { bg: "#DC143C", text: "#FFFFFF", name: "広島" },
-    "中": { bg: "#0057B8", text: "#FFFFFF", name: "中日" },
-    "ヤ": { bg: "#006AB6", text: "#FFFFFF", name: "ヤクルト" },
-    "デ": { bg: "#003FA8", text: "#FFFFFF", name: "DeNA" },
-    "ソ": { bg: "#FFD700", text: "#000000", name: "ソフトバンク" },
-    "西": { bg: "#003478", text: "#FFFFFF", name: "西武" },
-    "楽": { bg: "#8B0000", text: "#FFFFFF", name: "楽天" },
-    "ロ": { bg: "#000000", text: "#FFFFFF", name: "ロッテ" },
-    "日": { bg: "#003A70", text: "#FFFFFF", name: "日本ハム" },
-    "オ": { bg: "#002D62", text: "#FFFFFF", name: "オリックス" },
+type Team = {
+    code: string;
+    name: string;
+    color: string;
+    textColor: string;
 };
+
+const CENTRAL_TEAMS: Team[] = [
+    { code: "巨", name: "読売ジャイアンツ", color: "#FF6600", textColor: "#FFF" },
+    { code: "神", name: "阪神タイガース", color: "#FFE500", textColor: "#000" },
+    { code: "広", name: "広島東洋カープ", color: "#DC143C", textColor: "#FFF" },
+    { code: "中", name: "中日ドラゴンズ", color: "#0057B8", textColor: "#FFF" },
+    { code: "ヤ", name: "東京ヤクルトスワローズ", color: "#006AB6", textColor: "#FFF" },
+    { code: "デ", name: "横浜DeNAベイスターズ", color: "#003FA8", textColor: "#FFF" }
+];
+
+const PACIFIC_TEAMS: Team[] = [
+    { code: "ソ", name: "福岡ソフトバンクホークス", color: "#FFD700", textColor: "#000" },
+    { code: "西", name: "埼玉西武ライオンズ", color: "#003478", textColor: "#FFF" },
+    { code: "楽", name: "東北楽天ゴールデンイーグルス", color: "#8B0000", textColor: "#FFF" },
+    { code: "ロ", name: "千葉ロッテマリーンズ", color: "#000000", textColor: "#FFF" },
+    { code: "日", name: "北海道日本ハムファイターズ", color: "#003A70", textColor: "#FFF" },
+    { code: "オ", name: "オリックス・バファローズ", color: "#002D62", textColor: "#FFF" }
+];
+
+const ALL_TEAMS = [...CENTRAL_TEAMS, ...PACIFIC_TEAMS];
 
 function buildCalendar(year = 2025, monthIndex = 4) {
     const firstDay = new Date(year, monthIndex, 1).getDay();
@@ -35,6 +46,7 @@ function buildCalendar(year = 2025, monthIndex = 4) {
 
     const weeks: (number | null)[][] = [];
     let week = new Array(7).fill(null);
+
     let day = 1;
 
     for (let i = firstDay; i < 7; i++) {
@@ -52,203 +64,335 @@ function buildCalendar(year = 2025, monthIndex = 4) {
     return weeks;
 }
 
-function parseGameResult(game: Game) {
-    const [teams, scores] = game.team.split(" vs ").length === 2 
-        ? [game.team.split(" vs "), game.result.split(" - ")]
-        : [game.team.split("vs"), game.result.split("-")];
-    
-    if (!teams[0] || !teams[1]) return null;
-    
-    const homeTeam = teams[0].trim();
-    const awayTeam = teams[1].trim();
-    
-    if (game.result.includes("中止") || game.result.includes("未定")) {
-        return { homeTeam, awayTeam, homeScore: null, awayScore: null, status: "中止" };
-    }
-    
-    const homeScore = parseInt(scores[0]?.trim() || "0");
-    const awayScore = parseInt(scores[1]?.trim() || "0");
-    
-    return { homeTeam, awayTeam, homeScore, awayScore, status: "完了" };
-}
-
-function GameCard({ game }: { game: Game }) {
-    const parsed = parseGameResult(game);
-    if (!parsed) return null;
-    
-    const { homeTeam, awayTeam, homeScore, awayScore, status } = parsed;
-    const homeColor = TEAM_COLORS[homeTeam] || { bg: "#999", text: "#FFF", name: homeTeam };
-    const awayColor = TEAM_COLORS[awayTeam] || { bg: "#999", text: "#FFF", name: awayTeam };
-    
-    const homeWon = homeScore !== null && awayScore !== null && homeScore > awayScore;
-    const awayWon = homeScore !== null && awayScore !== null && awayScore > homeScore;
-    const isDraw = homeScore !== null && awayScore !== null && homeScore === awayScore;
-    
-    return (
-        <div className="mb-1.5 text-xs">
-            <div className="flex items-center justify-center gap-1">
-                {/* ホームチーム */}
-                <div 
-                    className="px-2 py-1 rounded font-bold"
-                    style={{ 
-                        backgroundColor: homeColor.bg,
-                        color: homeColor.text,
-                        opacity: status === "中止" ? 0.5 : homeWon ? 1 : 0.6,
-                        minWidth: "32px",
-                        textAlign: "center"
-                    }}
-                >
-                    {homeTeam}
-                </div>
-                
-                {/* スコア */}
-                {status === "完了" ? (
-                    <div className="font-bold text-slate-700 dark:text-slate-300 text-sm">
-                        {homeScore}-{awayScore}
-                    </div>
-                ) : (
-                    <div className="text-xs text-slate-400">中止</div>
-                )}
-                
-                {/* アウェイチーム */}
-                <div 
-                    className="px-2 py-1 rounded font-bold"
-                    style={{ 
-                        backgroundColor: awayColor.bg,
-                        color: awayColor.text,
-                        opacity: status === "中止" ? 0.5 : awayWon ? 1 : 0.6,
-                        minWidth: "32px",
-                        textAlign: "center"
-                    }}
-                >
-                    {awayTeam}
-                </div>
-            </div>
-        </div>
-    );
-}
-
 export default function Home() {
     const [byDate, setByDate] = useState<Record<number, Game[]>>({});
-    const [loading, setLoading] = useState(true);
+    const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
     const year = 2025;
     const monthIndex = 4;
 
     useEffect(() => {
         async function load() {
-            try {
-                const res = await fetch("/npb_data_202505.json");
-                const json: DayData[] = await res.json();
+            const res = await fetch("/npb_data_202505.json");
+            const json: DayData[] = await res.json();
 
-                const map: Record<number, Game[]> = {};
-                for (const entry of json) {
-                    if (entry.month === 5) {
-                        map[entry.date] = entry.games;
-                    }
+            const map: Record<number, Game[]> = {};
+            for (const entry of json) {
+                if (entry.month === 5) {
+                    map[entry.date] = entry.games;
                 }
-                setByDate(map);
-            } catch (err) {
-                console.error("データ読み込みエラー:", err);
-            } finally {
-                setLoading(false);
             }
+            setByDate(map);
         }
         load();
     }, []);
 
     const weeks = buildCalendar(year, monthIndex);
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="text-xl">読み込み中...</div>
-            </div>
-        );
-    }
+    // フィルタリング関数
+    const filterGames = (games: Game[]) => {
+        if (!selectedTeam) return games;
+        return games.filter(game => game.team.includes(selectedTeam));
+    };
+
+    const getTeamInfo = (code: string) => {
+        return ALL_TEAMS.find(t => t.code === code);
+    };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8">
-            <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-2">
-                        ⚾ NPB 2025年5月
-                    </h1>
-                    <p className="text-slate-600 dark:text-slate-400">試合結果カレンダー</p>
+        <div style={{ padding: 20, fontFamily: "system-ui", backgroundColor: "#f5f7fa", minHeight: "100vh" }}>
+            <h1 style={{ 
+                textAlign: "center", 
+                fontSize: 32, 
+                marginBottom: 10,
+                color: "#1a202c",
+                fontWeight: "bold"
+            }}>
+                ⚾ 2025年5月 NPB 試合カレンダー
+            </h1>
+            
+            {selectedTeam && (
+                <div style={{ 
+                    textAlign: "center", 
+                    fontSize: 16, 
+                    marginBottom: 20,
+                    color: "#475569"
+                }}>
+                    <span style={{
+                        padding: "6px 16px",
+                        backgroundColor: getTeamInfo(selectedTeam)?.color,
+                        color: getTeamInfo(selectedTeam)?.textColor,
+                        borderRadius: 20,
+                        fontWeight: "bold"
+                    }}>
+                        {getTeamInfo(selectedTeam)?.name} の試合を表示中
+                    </span>
+                    <button
+                        onClick={() => setSelectedTeam(null)}
+                        style={{
+                            marginLeft: 10,
+                            padding: "6px 16px",
+                            backgroundColor: "#64748b",
+                            color: "white",
+                            border: "none",
+                            borderRadius: 20,
+                            cursor: "pointer",
+                            fontWeight: "bold"
+                        }}
+                    >
+                        ✕ 解除
+                    </button>
                 </div>
+            )}
 
-                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl overflow-hidden">
-                    <div className="grid grid-cols-7 bg-slate-700 text-white">
-                        {["日", "月", "火", "水", "木", "金", "土"].map((day, i) => (
-                            <div
-                                key={day}
-                                className="text-center py-3 font-bold text-sm"
+            <table
+                style={{ 
+                    borderCollapse: "separate",
+                    borderSpacing: 0,
+                    width: "100%", 
+                    maxWidth: 1200,
+                    margin: "0 auto",
+                    backgroundColor: "white",
+                    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                    borderRadius: 12,
+                    overflow: "hidden"
+                }}
+            >
+                <thead>
+                <tr>
+                    {["日", "月", "火", "水", "木", "金", "土"].map((d, i) => (
+                        <th
+                            key={d}
+                            style={{
+                                padding: 16,
+                                backgroundColor: i === 0 ? "#ef4444" : i === 6 ? "#3b82f6" : "#475569",
+                                color: "white",
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                fontSize: 14
+                            }}
+                        >
+                            {d}
+                        </th>
+                    ))}
+                </tr>
+                </thead>
+
+                <tbody>
+                {weeks.map((week, wi) => (
+                    <tr key={wi}>
+                        {week.map((date, di) => {
+                            const games = date && byDate[date] ? filterGames(byDate[date]) : [];
+                            const hasGames = games.length > 0;
+                            
+                            return (
+                                <td
+                                    key={di}
+                                    style={{
+                                        verticalAlign: "top",
+                                        border: "1px solid #e2e8f0",
+                                        minHeight: 140,
+                                        padding: 12,
+                                        backgroundColor: di === 0 ? "#fef2f2" : di === 6 ? "#eff6ff" : "white",
+                                        opacity: selectedTeam && date && !hasGames ? 0.3 : 1
+                                    }}
+                                >
+                                    {date && (
+                                        <>
+                                            <div style={{ 
+                                                fontWeight: "bold", 
+                                                fontSize: 18,
+                                                color: di === 0 ? "#dc2626" : di === 6 ? "#2563eb" : "#1e293b",
+                                                marginBottom: 8
+                                            }}>
+                                                {date}
+                                            </div>
+
+                                            <div style={{ fontSize: 12 }}>
+                                                {hasGames ? (
+                                                    games.map((g, i) => (
+                                                        <div 
+                                                            key={i} 
+                                                            style={{ 
+                                                                marginBottom: 6,
+                                                                padding: "6px 8px",
+                                                                backgroundColor: "white",
+                                                                borderRadius: 6,
+                                                                border: "1px solid #e2e8f0",
+                                                                fontSize: 11,
+                                                                lineHeight: 1.4
+                                                            }}
+                                                        >
+                                                            <div style={{ 
+                                                                fontWeight: "600",
+                                                                color: "#334155",
+                                                                marginBottom: 2
+                                                            }}>
+                                                                {g.team}
+                                                            </div>
+                                                            <div style={{ 
+                                                                color: g.result.includes("中止") ? "#94a3b8" : "#0ea5e9",
+                                                                fontWeight: "bold",
+                                                                fontSize: 13
+                                                            }}>
+                                                                {g.result}
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                ) : date && byDate[date] ? (
+                                                    <div style={{ 
+                                                        color: "#cbd5e1",
+                                                        textAlign: "center",
+                                                        padding: "20px 0",
+                                                        fontSize: 11
+                                                    }}>
+                                                        フィルタ対象外
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ 
+                                                        color: "#cbd5e1",
+                                                        textAlign: "center",
+                                                        padding: "20px 0",
+                                                        fontSize: 11
+                                                    }}>
+                                                        試合なし
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
+                                </td>
+                            );
+                        })}
+                    </tr>
+                ))}
+                </tbody>
+            </table>
+            
+            <div style={{ 
+                maxWidth: 1200, 
+                margin: "20px auto",
+                padding: "16px 20px",
+                backgroundColor: "white",
+                borderRadius: 12,
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                fontSize: 12,
+                color: "#64748b"
+            }}>
+                💡 球団ロゴをクリックすると、その球団の試合のみを表示できます。
+            </div>
+            
+            <div style={{ 
+                maxWidth: 1200, 
+                margin: "20px auto",
+                padding: "20px",
+                backgroundColor: "white",
+                borderRadius: 12,
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+            }}>
+                <h2 style={{ 
+                    fontSize: 18, 
+                    fontWeight: "bold", 
+                    marginBottom: 16,
+                    color: "#1e293b"
+                }}>
+                    📋 球団選択
+                </h2>
+                
+                <div style={{ marginBottom: 20 }}>
+                    <div style={{ 
+                        fontSize: 14, 
+                        fontWeight: "600", 
+                        marginBottom: 10,
+                        color: "#475569"
+                    }}>
+                        セントラル・リーグ
+                    </div>
+                    <div style={{ 
+                        display: "grid", 
+                        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                        gap: 10
+                    }}>
+                        {CENTRAL_TEAMS.map((team) => (
+                            <button
+                                key={team.code}
+                                onClick={() => setSelectedTeam(selectedTeam === team.code ? null : team.code)}
                                 style={{ 
-                                    backgroundColor: i === 0 ? "#DC143C" : i === 6 ? "#0057B8" : undefined 
+                                    padding: "12px 16px",
+                                    borderRadius: 8,
+                                    backgroundColor: team.color,
+                                    color: team.textColor,
+                                    fontSize: 13,
+                                    fontWeight: "600",
+                                    border: selectedTeam === team.code ? "3px solid #1e293b" : "3px solid transparent",
+                                    cursor: "pointer",
+                                    transition: "all 0.2s",
+                                    boxShadow: selectedTeam === team.code ? "0 4px 8px rgba(0,0,0,0.2)" : "none",
+                                    transform: selectedTeam === team.code ? "scale(1.05)" : "scale(1)"
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = "scale(1.05)";
+                                    e.currentTarget.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (selectedTeam !== team.code) {
+                                        e.currentTarget.style.transform = "scale(1)";
+                                        e.currentTarget.style.boxShadow = "none";
+                                    }
                                 }}
                             >
-                                {day}
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="divide-y divide-slate-200 dark:divide-slate-700">
-                        {weeks.map((week, wi) => (
-                            <div key={wi} className="grid grid-cols-7 divide-x divide-slate-200 dark:divide-slate-700">
-                                {week.map((date, di) => (
-                                    <div
-                                        key={di}
-                                        className="min-h-32 p-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors"
-                                        style={{
-                                            backgroundColor: di === 0 
-                                                ? "rgba(220, 20, 60, 0.05)" 
-                                                : di === 6 
-                                                ? "rgba(0, 87, 184, 0.05)" 
-                                                : undefined
-                                        }}
-                                    >
-                                        {date && (
-                                            <>
-                                                <div className="font-bold text-lg mb-2 text-slate-700 dark:text-slate-300">
-                                                    {date}
-                                                </div>
-
-                                                <div className="space-y-1">
-                                                    {byDate[date] && byDate[date].length > 0 ? (
-                                                        byDate[date].map((g, i) => (
-                                                            <GameCard key={i} game={g} />
-                                                        ))
-                                                    ) : (
-                                                        <div className="text-xs text-slate-400 text-center py-4">
-                                                            試合なし
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
+                                <div style={{ fontSize: 20, marginBottom: 4 }}>{team.code}</div>
+                                <div style={{ fontSize: 11 }}>{team.name}</div>
+                            </button>
                         ))}
                     </div>
                 </div>
-
-                {/* 凡例 */}
-                <div className="mt-8 bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
-                    <h3 className="font-bold text-lg mb-4 text-slate-800 dark:text-slate-100">チームカラー凡例</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                        {Object.entries(TEAM_COLORS).map(([code, info]) => (
-                            <div
-                                key={code}
-                                className="flex items-center gap-2 px-3 py-2 rounded"
-                                style={{ backgroundColor: info.bg, color: info.text }}
-                            >
-                                <span className="font-bold">{code}</span>
-                                <span className="text-sm">{info.name}</span>
-                            </div>
-                        ))}
+                
+                <div>
+                    <div style={{ 
+                        fontSize: 14, 
+                        fontWeight: "600", 
+                        marginBottom: 10,
+                        color: "#475569"
+                    }}>
+                        パシフィック・リーグ
                     </div>
-                    <div className="mt-4 text-sm text-slate-600 dark:text-slate-400">
-                        <p>⚪ = 勝利 / △ = 引き分け / 太字 = 勝利チーム</p>
+                    <div style={{ 
+                        display: "grid", 
+                        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                        gap: 10
+                    }}>
+                        {PACIFIC_TEAMS.map((team) => (
+                            <button
+                                key={team.code}
+                                onClick={() => setSelectedTeam(selectedTeam === team.code ? null : team.code)}
+                                style={{ 
+                                    padding: "12px 16px",
+                                    borderRadius: 8,
+                                    backgroundColor: team.color,
+                                    color: team.textColor,
+                                    fontSize: 13,
+                                    fontWeight: "600",
+                                    border: selectedTeam === team.code ? "3px solid #1e293b" : "3px solid transparent",
+                                    cursor: "pointer",
+                                    transition: "all 0.2s",
+                                    boxShadow: selectedTeam === team.code ? "0 4px 8px rgba(0,0,0,0.2)" : "none",
+                                    transform: selectedTeam === team.code ? "scale(1.05)" : "scale(1)"
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = "scale(1.05)";
+                                    e.currentTarget.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (selectedTeam !== team.code) {
+                                        e.currentTarget.style.transform = "scale(1)";
+                                        e.currentTarget.style.boxShadow = "none";
+                                    }
+                                }}
+                            >
+                                <div style={{ fontSize: 20, marginBottom: 4 }}>{team.code}</div>
+                                <div style={{ fontSize: 11 }}>{team.name}</div>
+                            </button>
+                        ))}
                     </div>
                 </div>
             </div>
