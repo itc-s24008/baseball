@@ -234,7 +234,7 @@ export default function Home() {
                                                                 fontWeight: "bold",
                                                                 fontSize: 13
                                                             }}>
-                                                                {g.result}
+                                                                {g.result.replace(/\s*-\s*/g, ' - ').replace(/\s+/g, ' ')}
                                                             </div>
                                                         </div>
                                                     ))
@@ -295,7 +295,7 @@ export default function Home() {
                     marginBottom: 16,
                     color: "#1e293b"
                 }}>
-                    📋 球団選択
+                    球団選択
                 </h2>
                 
                 <div style={{ marginBottom: 20 }}>
