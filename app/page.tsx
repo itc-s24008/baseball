@@ -67,6 +67,7 @@ function buildCalendar(year = 2025, monthIndex = 4) {
 export default function Home() {
     const [byDate, setByDate] = useState<Record<number, Game[]>>({});
     const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+    const [selectedGame, setSelectedGame] = useState<{ game: Game; date: number } | null>(null);
     const year = 2025;
     const monthIndex = 4;
 
@@ -212,6 +213,7 @@ export default function Home() {
                                                     games.map((g, i) => (
                                                         <div 
                                                             key={i} 
+                                                            onClick={() => setSelectedGame({ game: g, date: date })}
                                                             style={{ 
                                                                 marginBottom: 6,
                                                                 padding: "6px 8px",
@@ -219,7 +221,19 @@ export default function Home() {
                                                                 borderRadius: 6,
                                                                 border: "1px solid #e2e8f0",
                                                                 fontSize: 11,
-                                                                lineHeight: 1.4
+                                                                lineHeight: 1.4,
+                                                                cursor: "pointer",
+                                                                transition: "all 0.2s"
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                e.currentTarget.style.backgroundColor = "#f8fafc";
+                                                                e.currentTarget.style.borderColor = "#3b82f6";
+                                                                e.currentTarget.style.transform = "scale(1.02)";
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                e.currentTarget.style.backgroundColor = "white";
+                                                                e.currentTarget.style.borderColor = "#e2e8f0";
+                                                                e.currentTarget.style.transform = "scale(1)";
                                                             }}
                                                         >
                                                             <div style={{ 
@@ -249,12 +263,23 @@ export default function Home() {
                                                     </div>
                                                 ) : (
                                                     <div style={{ 
-                                                        color: "#cbd5e1",
                                                         textAlign: "center",
-                                                        padding: "20px 0",
-                                                        fontSize: 11
+                                                        padding: "30px 10px",
+                                                        fontSize: 12
                                                     }}>
-                                                        試合なし
+                                                        <div style={{
+                                                            fontSize: 32,
+                                                            marginBottom: 8,
+                                                            opacity: 0.3
+                                                        }}>
+                                                            ⚾
+                                                        </div>
+                                                        <div style={{
+                                                            color: "#94a3b8",
+                                                            fontWeight: "500"
+                                                        }}>
+                                                            試合なし
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
@@ -267,6 +292,222 @@ export default function Home() {
                 ))}
                 </tbody>
             </table>
+            
+            {/* 試合詳細モーダル */}
+            {selectedGame && (
+                <div 
+                    onClick={() => setSelectedGame(null)}
+                    style={{
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: "rgba(0, 0, 0, 0.5)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        zIndex: 1000,
+                        padding: 20
+                    }}
+                >
+                    <div 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            backgroundColor: "white",
+                            borderRadius: 16,
+                            padding: 32,
+                            maxWidth: 500,
+                            width: "100%",
+                            boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                            position: "relative"
+                        }}
+                    >
+                        <button
+                            onClick={() => setSelectedGame(null)}
+                            style={{
+                                position: "absolute",
+                                top: 16,
+                                right: 16,
+                                backgroundColor: "#f1f5f9",
+                                border: "none",
+                                borderRadius: 8,
+                                width: 32,
+                                height: 32,
+                                cursor: "pointer",
+                                fontSize: 18,
+                                color: "#64748b",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center"
+                            }}
+                        >
+                            ✕
+                        </button>
+                        
+                        <h2 style={{ 
+                            fontSize: 24, 
+                            fontWeight: "bold", 
+                            marginBottom: 8,
+                            color: "#1e293b"
+                        }}>
+                            試合詳細
+                        </h2>
+                        
+                        <div style={{ 
+                            fontSize: 14, 
+                            color: "#64748b",
+                            marginBottom: 24
+                        }}>
+                            {year}年{monthIndex + 1}月{selectedGame.date}日
+                        </div>
+                        
+                        {(() => {
+                            const teams = selectedGame.game.team.includes(" vs ")
+                                ? selectedGame.game.team.split(" vs ")
+                                : selectedGame.game.team.split("vs");
+                            const homeTeam = teams[0]?.trim();
+                            const awayTeam = teams[1]?.trim();
+                            const homeInfo = ALL_TEAMS.find(t => t.code === homeTeam);
+                            const awayInfo = ALL_TEAMS.find(t => t.code === awayTeam);
+                            
+                            const isCancelled = selectedGame.game.result.includes("中止") || selectedGame.game.result.includes("未定");
+                            const scores = !isCancelled ? selectedGame.game.result.split("-").map(s => s.trim()) : [];
+                            const homeScore = scores[0] ? parseInt(scores[0]) : null;
+                            const awayScore = scores[1] ? parseInt(scores[1]) : null;
+                            const homeWon = homeScore !== null && awayScore !== null && homeScore > awayScore;
+                            const awayWon = homeScore !== null && awayScore !== null && awayScore > homeScore;
+                            
+                            return (
+                                <>
+                                    <div style={{ 
+                                        display: "flex", 
+                                        alignItems: "center", 
+                                        justifyContent: "space-between",
+                                        marginBottom: 20,
+                                        padding: 24,
+                                        backgroundColor: "#f8fafc",
+                                        borderRadius: 12
+                                    }}>
+                                        <div style={{ flex: 1, textAlign: "center" }}>
+                                            <div 
+                                                style={{
+                                                    width: 80,
+                                                    height: 80,
+                                                    margin: "0 auto 12px",
+                                                    backgroundColor: homeInfo?.color || "#999",
+                                                    color: homeInfo?.textColor || "#FFF",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    fontSize: 32,
+                                                    fontWeight: "bold",
+                                                    borderRadius: 12,
+                                                    opacity: isCancelled ? 0.5 : homeWon ? 1 : 0.6
+                                                }}
+                                            >
+                                                {homeTeam}
+                                            </div>
+                                            <div style={{ 
+                                                fontSize: 16, 
+                                                fontWeight: "600",
+                                                color: "#1e293b",
+                                                marginBottom: 4
+                                            }}>
+                                                {homeInfo?.name || homeTeam}
+                                            </div>
+                                            {!isCancelled && (
+                                                <div style={{ 
+                                                    fontSize: 36, 
+                                                    fontWeight: "bold",
+                                                    color: homeWon ? "#16a34a" : "#64748b"
+                                                }}>
+                                                    {homeScore}
+                                                </div>
+                                            )}
+                                            {homeWon && <div style={{ color: "#16a34a", fontWeight: "bold" }}>勝利</div>}
+                                        </div>
+                                        
+                                        <div style={{ 
+                                            fontSize: 24, 
+                                            color: "#94a3b8",
+                                            fontWeight: "bold",
+                                            padding: "0 20px"
+                                        }}>
+                                            VS
+                                        </div>
+                                        
+                                        <div style={{ flex: 1, textAlign: "center" }}>
+                                            <div 
+                                                style={{
+                                                    width: 80,
+                                                    height: 80,
+                                                    margin: "0 auto 12px",
+                                                    backgroundColor: awayInfo?.color || "#999",
+                                                    color: awayInfo?.textColor || "#FFF",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    fontSize: 32,
+                                                    fontWeight: "bold",
+                                                    borderRadius: 12,
+                                                    opacity: isCancelled ? 0.5 : awayWon ? 1 : 0.6
+                                                }}
+                                            >
+                                                {awayTeam}
+                                            </div>
+                                            <div style={{ 
+                                                fontSize: 16, 
+                                                fontWeight: "600",
+                                                color: "#1e293b",
+                                                marginBottom: 4
+                                            }}>
+                                                {awayInfo?.name || awayTeam}
+                                            </div>
+                                            {!isCancelled && (
+                                                <div style={{ 
+                                                    fontSize: 36, 
+                                                    fontWeight: "bold",
+                                                    color: awayWon ? "#16a34a" : "#64748b"
+                                                }}>
+                                                    {awayScore}
+                                                </div>
+                                            )}
+                                            {awayWon && <div style={{ color: "#16a34a", fontWeight: "bold" }}>勝利</div>}
+                                        </div>
+                                    </div>
+                                    
+                                    {isCancelled && (
+                                        <div style={{
+                                            padding: 16,
+                                            backgroundColor: "#fef2f2",
+                                            color: "#dc2626",
+                                            borderRadius: 8,
+                                            textAlign: "center",
+                                            fontWeight: "600"
+                                        }}>
+                                            ⚠️ この試合は中止または未定です
+                                        </div>
+                                    )}
+                                    
+                                    {!isCancelled && homeScore === awayScore && (
+                                        <div style={{
+                                            padding: 16,
+                                            backgroundColor: "#f0f9ff",
+                                            color: "#0369a1",
+                                            borderRadius: 8,
+                                            textAlign: "center",
+                                            fontWeight: "600"
+                                        }}>
+                                            引き分け
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
+                    </div>
+                </div>
+            )}
             
             <div style={{ 
                 maxWidth: 1200, 
@@ -295,7 +536,7 @@ export default function Home() {
                     marginBottom: 16,
                     color: "#1e293b"
                 }}>
-                    球団選択
+                    📋 球団選択
                 </h2>
                 
                 <div style={{ marginBottom: 20 }}>
