@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import styles from "./page.module.css";
 
 type Game = {
     team: string;
@@ -89,7 +90,6 @@ export default function Home() {
 
     const weeks = buildCalendar(year, monthIndex);
 
-    // フィルタリング関数
     const filterGames = (games: Game[]) => {
         if (!selectedTeam) return games;
         return games.filter(game => game.team.includes(selectedTeam));
@@ -100,77 +100,42 @@ export default function Home() {
     };
 
     return (
-        <div style={{ padding: 20, fontFamily: "system-ui", backgroundColor: "#f5f7fa", minHeight: "100vh" }}>
-            <h1 style={{ 
-                textAlign: "center", 
-                fontSize: 32, 
-                marginBottom: 10,
-                color: "#1a202c",
-                fontWeight: "bold"
-            }}>
+        <div className={styles.container}>
+            <h1 className={styles.title}>
                 ⚾ 2025年5月 NPB 試合カレンダー
             </h1>
             
             {selectedTeam && (
-                <div style={{ 
-                    textAlign: "center", 
-                    fontSize: 16, 
-                    marginBottom: 20,
-                    color: "#475569"
-                }}>
-                    <span style={{
-                        padding: "6px 16px",
-                        backgroundColor: getTeamInfo(selectedTeam)?.color,
-                        color: getTeamInfo(selectedTeam)?.textColor,
-                        borderRadius: 20,
-                        fontWeight: "bold"
-                    }}>
+                <div className={styles.filterBadge}>
+                    <span 
+                        className={styles.teamBadge}
+                        style={{
+                            backgroundColor: getTeamInfo(selectedTeam)?.color,
+                            color: getTeamInfo(selectedTeam)?.textColor,
+                        }}
+                    >
                         {getTeamInfo(selectedTeam)?.name} の試合を表示中
                     </span>
                     <button
                         onClick={() => setSelectedTeam(null)}
-                        style={{
-                            marginLeft: 10,
-                            padding: "6px 16px",
-                            backgroundColor: "#64748b",
-                            color: "white",
-                            border: "none",
-                            borderRadius: 20,
-                            cursor: "pointer",
-                            fontWeight: "bold"
-                        }}
+                        className={styles.clearButton}
                     >
                         ✕ 解除
                     </button>
                 </div>
             )}
 
-            <table
-                style={{ 
-                    borderCollapse: "separate",
-                    borderSpacing: 0,
-                    width: "100%", 
-                    maxWidth: 1200,
-                    margin: "0 auto",
-                    backgroundColor: "white",
-                    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-                    borderRadius: 12,
-                    overflow: "hidden"
-                }}
-            >
+            <table className={styles.calendar}>
                 <thead>
                 <tr>
                     {["日", "月", "火", "水", "木", "金", "土"].map((d, i) => (
                         <th
                             key={d}
-                            style={{
-                                padding: 16,
-                                backgroundColor: i === 0 ? "#ef4444" : i === 6 ? "#3b82f6" : "#475569",
-                                color: "white",
-                                textAlign: "center",
-                                fontWeight: "bold",
-                                fontSize: 14
-                            }}
+                            className={`${styles.headerCell} ${
+                                i === 0 ? styles.headerSunday : 
+                                i === 6 ? styles.headerSaturday : 
+                                styles.headerWeekday
+                            }`}
                         >
                             {d}
                         </th>
@@ -188,96 +153,50 @@ export default function Home() {
                             return (
                                 <td
                                     key={di}
-                                    style={{
-                                        verticalAlign: "top",
-                                        border: "1px solid #e2e8f0",
-                                        minHeight: 140,
-                                        padding: 12,
-                                        backgroundColor: di === 0 ? "#fef2f2" : di === 6 ? "#eff6ff" : "white",
-                                        opacity: selectedTeam && date && !hasGames ? 0.3 : 1
-                                    }}
+                                    className={`${styles.calendarCell} ${
+                                        di === 0 ? styles.cellSunday : 
+                                        di === 6 ? styles.cellSaturday : 
+                                        styles.cellWeekday
+                                    } ${selectedTeam && date && !hasGames ? styles.cellFiltered : ''}`}
                                 >
                                     {date && (
                                         <>
-                                            <div style={{ 
-                                                fontWeight: "bold", 
-                                                fontSize: 18,
-                                                color: di === 0 ? "#dc2626" : di === 6 ? "#2563eb" : "#1e293b",
-                                                marginBottom: 8
-                                            }}>
+                                            <div className={`${styles.dateNumber} ${
+                                                di === 0 ? styles.dateSunday : 
+                                                di === 6 ? styles.dateSaturday : 
+                                                styles.dateWeekday
+                                            }`}>
                                                 {date}
                                             </div>
 
-                                            <div style={{ fontSize: 12 }}>
+                                            <div className={styles.gamesContainer}>
                                                 {hasGames ? (
                                                     games.map((g, i) => (
                                                         <div 
                                                             key={i} 
                                                             onClick={() => setSelectedGame({ game: g, date: date })}
-                                                            style={{ 
-                                                                marginBottom: 6,
-                                                                padding: "6px 8px",
-                                                                backgroundColor: "white",
-                                                                borderRadius: 6,
-                                                                border: "1px solid #e2e8f0",
-                                                                fontSize: 11,
-                                                                lineHeight: 1.4,
-                                                                cursor: "pointer",
-                                                                transition: "all 0.2s"
-                                                            }}
-                                                            onMouseEnter={(e) => {
-                                                                e.currentTarget.style.backgroundColor = "#f8fafc";
-                                                                e.currentTarget.style.borderColor = "#3b82f6";
-                                                                e.currentTarget.style.transform = "scale(1.02)";
-                                                            }}
-                                                            onMouseLeave={(e) => {
-                                                                e.currentTarget.style.backgroundColor = "white";
-                                                                e.currentTarget.style.borderColor = "#e2e8f0";
-                                                                e.currentTarget.style.transform = "scale(1)";
-                                                            }}
+                                                            className={styles.gameCard}
                                                         >
-                                                            <div style={{ 
-                                                                fontWeight: "600",
-                                                                color: "#334155",
-                                                                marginBottom: 2
-                                                            }}>
+                                                            <div className={styles.gameTeam}>
                                                                 {g.team}
                                                             </div>
-                                                            <div style={{ 
-                                                                color: g.result.includes("中止") ? "#94a3b8" : "#0ea5e9",
-                                                                fontWeight: "bold",
-                                                                fontSize: 13
-                                                            }}>
+                                                            <div className={`${styles.gameResult} ${
+                                                                g.result.includes("中止") ? styles.gameResultCancelled : styles.gameResultActive
+                                                            }`}>
                                                                 {g.result.replace(/\s*-\s*/g, ' - ').replace(/\s+/g, ' ')}
                                                             </div>
                                                         </div>
                                                     ))
                                                 ) : date && byDate[date] ? (
-                                                    <div style={{ 
-                                                        color: "#cbd5e1",
-                                                        textAlign: "center",
-                                                        padding: "20px 0",
-                                                        fontSize: 11
-                                                    }}>
+                                                    <div className={styles.noGamesFiltered}>
                                                         フィルタ対象外
                                                     </div>
                                                 ) : (
-                                                    <div style={{ 
-                                                        textAlign: "center",
-                                                        padding: "30px 10px",
-                                                        fontSize: 12
-                                                    }}>
-                                                        <div style={{
-                                                            fontSize: 32,
-                                                            marginBottom: 8,
-                                                            opacity: 0.3
-                                                        }}>
+                                                    <div className={styles.noGames}>
+                                                        <div className={styles.noGamesIcon}>
                                                             ⚾
                                                         </div>
-                                                        <div style={{
-                                                            color: "#94a3b8",
-                                                            fontWeight: "500"
-                                                        }}>
+                                                        <div className={styles.noGamesText}>
                                                             試合なし
                                                         </div>
                                                     </div>
@@ -293,72 +212,27 @@ export default function Home() {
                 </tbody>
             </table>
             
-            {/* 試合詳細モーダル */}
             {selectedGame && (
                 <div 
                     onClick={() => setSelectedGame(null)}
-                    style={{
-                        position: "fixed",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: "rgba(0, 0, 0, 0.5)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        zIndex: 1000,
-                        padding: 20
-                    }}
+                    className={styles.modalOverlay}
                 >
                     <div 
                         onClick={(e) => e.stopPropagation()}
-                        style={{
-                            backgroundColor: "white",
-                            borderRadius: 16,
-                            padding: 32,
-                            maxWidth: 500,
-                            width: "100%",
-                            boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-                            position: "relative"
-                        }}
+                        className={styles.modalContent}
                     >
                         <button
                             onClick={() => setSelectedGame(null)}
-                            style={{
-                                position: "absolute",
-                                top: 16,
-                                right: 16,
-                                backgroundColor: "#f1f5f9",
-                                border: "none",
-                                borderRadius: 8,
-                                width: 32,
-                                height: 32,
-                                cursor: "pointer",
-                                fontSize: 18,
-                                color: "#64748b",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center"
-                            }}
+                            className={styles.modalClose}
                         >
                             ✕
                         </button>
                         
-                        <h2 style={{ 
-                            fontSize: 24, 
-                            fontWeight: "bold", 
-                            marginBottom: 8,
-                            color: "#1e293b"
-                        }}>
+                        <h2 className={styles.modalTitle}>
                             試合詳細
                         </h2>
                         
-                        <div style={{ 
-                            fontSize: 14, 
-                            color: "#64748b",
-                            marginBottom: 24
-                        }}>
+                        <div className={styles.modalDate}>
                             {year}年{monthIndex + 1}月{selectedGame.date}日
                         </div>
                         
@@ -380,125 +254,72 @@ export default function Home() {
                             
                             return (
                                 <>
-                                    <div style={{ 
-                                        display: "flex", 
-                                        alignItems: "center", 
-                                        justifyContent: "space-between",
-                                        marginBottom: 20,
-                                        padding: 24,
-                                        backgroundColor: "#f8fafc",
-                                        borderRadius: 12
-                                    }}>
-                                        <div style={{ flex: 1, textAlign: "center" }}>
+                                    <div className={styles.matchupContainer}>
+                                        <div className={styles.teamContainer}>
                                             <div 
+                                                className={`${styles.teamLogo} ${
+                                                    isCancelled ? styles.teamLogoCancelled : 
+                                                    homeWon ? styles.teamLogoWinner : styles.teamLogoLoser
+                                                }`}
                                                 style={{
-                                                    width: 80,
-                                                    height: 80,
-                                                    margin: "0 auto 12px",
                                                     backgroundColor: homeInfo?.color || "#999",
                                                     color: homeInfo?.textColor || "#FFF",
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                    fontSize: 32,
-                                                    fontWeight: "bold",
-                                                    borderRadius: 12,
-                                                    opacity: isCancelled ? 0.5 : homeWon ? 1 : 0.6
                                                 }}
                                             >
                                                 {homeTeam}
                                             </div>
-                                            <div style={{ 
-                                                fontSize: 16, 
-                                                fontWeight: "600",
-                                                color: "#1e293b",
-                                                marginBottom: 4
-                                            }}>
+                                            <div className={styles.teamName}>
                                                 {homeInfo?.name || homeTeam}
                                             </div>
                                             {!isCancelled && (
-                                                <div style={{ 
-                                                    fontSize: 36, 
-                                                    fontWeight: "bold",
-                                                    color: homeWon ? "#16a34a" : "#64748b"
-                                                }}>
+                                                <div className={`${styles.teamScore} ${
+                                                    homeWon ? styles.scoreWinner : styles.scoreNeutral
+                                                }`}>
                                                     {homeScore}
                                                 </div>
                                             )}
-                                            {homeWon && <div style={{ color: "#16a34a", fontWeight: "bold" }}>勝利</div>}
+                                            {homeWon && <div className={styles.winnerLabel}>勝利</div>}
                                         </div>
                                         
-                                        <div style={{ 
-                                            fontSize: 24, 
-                                            color: "#94a3b8",
-                                            fontWeight: "bold",
-                                            padding: "0 20px"
-                                        }}>
+                                        <div className={styles.vsText}>
                                             VS
                                         </div>
                                         
-                                        <div style={{ flex: 1, textAlign: "center" }}>
+                                        <div className={styles.teamContainer}>
                                             <div 
+                                                className={`${styles.teamLogo} ${
+                                                    isCancelled ? styles.teamLogoCancelled : 
+                                                    awayWon ? styles.teamLogoWinner : styles.teamLogoLoser
+                                                }`}
                                                 style={{
-                                                    width: 80,
-                                                    height: 80,
-                                                    margin: "0 auto 12px",
                                                     backgroundColor: awayInfo?.color || "#999",
                                                     color: awayInfo?.textColor || "#FFF",
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                    fontSize: 32,
-                                                    fontWeight: "bold",
-                                                    borderRadius: 12,
-                                                    opacity: isCancelled ? 0.5 : awayWon ? 1 : 0.6
                                                 }}
                                             >
                                                 {awayTeam}
                                             </div>
-                                            <div style={{ 
-                                                fontSize: 16, 
-                                                fontWeight: "600",
-                                                color: "#1e293b",
-                                                marginBottom: 4
-                                            }}>
+                                            <div className={styles.teamName}>
                                                 {awayInfo?.name || awayTeam}
                                             </div>
                                             {!isCancelled && (
-                                                <div style={{ 
-                                                    fontSize: 36, 
-                                                    fontWeight: "bold",
-                                                    color: awayWon ? "#16a34a" : "#64748b"
-                                                }}>
+                                                <div className={`${styles.teamScore} ${
+                                                    awayWon ? styles.scoreWinner : styles.scoreNeutral
+                                                }`}>
                                                     {awayScore}
                                                 </div>
                                             )}
-                                            {awayWon && <div style={{ color: "#16a34a", fontWeight: "bold" }}>勝利</div>}
+                                            {awayWon && <div className={styles.winnerLabel}>勝利</div>}
                                         </div>
                                     </div>
                                     
                                     {isCancelled && (
-                                        <div style={{
-                                            padding: 16,
-                                            backgroundColor: "#fef2f2",
-                                            color: "#dc2626",
-                                            borderRadius: 8,
-                                            textAlign: "center",
-                                            fontWeight: "600"
-                                        }}>
+                                        <div className={styles.cancelledNotice}>
                                             ⚠️ この試合は中止または未定です
                                         </div>
                                     )}
                                     
                                     {!isCancelled && homeScore === awayScore && (
-                                        <div style={{
-                                            padding: 16,
-                                            backgroundColor: "#f0f9ff",
-                                            color: "#0369a1",
-                                            borderRadius: 8,
-                                            textAlign: "center",
-                                            fontWeight: "600"
-                                        }}>
+                                        <div className={styles.drawNotice}>
                                             引き分け
                                         </div>
                                     )}
@@ -509,129 +330,54 @@ export default function Home() {
                 </div>
             )}
             
-            <div style={{ 
-                maxWidth: 1200, 
-                margin: "20px auto",
-                padding: "16px 20px",
-                backgroundColor: "white",
-                borderRadius: 12,
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                fontSize: 12,
-                color: "#64748b"
-            }}>
+            <div className={styles.hint}>
                 💡 球団ロゴをクリックすると、その球団の試合のみを表示できます。
             </div>
             
-            <div style={{ 
-                maxWidth: 1200, 
-                margin: "20px auto",
-                padding: "20px",
-                backgroundColor: "white",
-                borderRadius: 12,
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
-            }}>
-                <h2 style={{ 
-                    fontSize: 18, 
-                    fontWeight: "bold", 
-                    marginBottom: 16,
-                    color: "#1e293b"
-                }}>
+            <div className={styles.teamSelection}>
+                <h2 className={styles.selectionTitle}>
                     📋 球団選択
                 </h2>
                 
-                <div style={{ marginBottom: 20 }}>
-                    <div style={{ 
-                        fontSize: 14, 
-                        fontWeight: "600", 
-                        marginBottom: 10,
-                        color: "#475569"
-                    }}>
+                <div className={styles.leagueSection}>
+                    <div className={styles.leagueTitle}>
                         セントラル・リーグ
                     </div>
-                    <div style={{ 
-                        display: "grid", 
-                        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                        gap: 10
-                    }}>
+                    <div className={styles.teamGrid}>
                         {CENTRAL_TEAMS.map((team) => (
                             <button
                                 key={team.code}
                                 onClick={() => setSelectedTeam(selectedTeam === team.code ? null : team.code)}
+                                className={`${styles.teamButton} ${selectedTeam === team.code ? styles.teamButtonSelected : ''}`}
                                 style={{ 
-                                    padding: "12px 16px",
-                                    borderRadius: 8,
                                     backgroundColor: team.color,
                                     color: team.textColor,
-                                    fontSize: 13,
-                                    fontWeight: "600",
-                                    border: selectedTeam === team.code ? "3px solid #1e293b" : "3px solid transparent",
-                                    cursor: "pointer",
-                                    transition: "all 0.2s",
-                                    boxShadow: selectedTeam === team.code ? "0 4px 8px rgba(0,0,0,0.2)" : "none",
-                                    transform: selectedTeam === team.code ? "scale(1.05)" : "scale(1)"
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = "scale(1.05)";
-                                    e.currentTarget.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (selectedTeam !== team.code) {
-                                        e.currentTarget.style.transform = "scale(1)";
-                                        e.currentTarget.style.boxShadow = "none";
-                                    }
                                 }}
                             >
-                                <div style={{ fontSize: 20, marginBottom: 4 }}>{team.code}</div>
-                                <div style={{ fontSize: 11 }}>{team.name}</div>
+                                <div className={styles.teamButtonCode}>{team.code}</div>
+                                <div className={styles.teamButtonName}>{team.name}</div>
                             </button>
                         ))}
                     </div>
                 </div>
                 
                 <div>
-                    <div style={{ 
-                        fontSize: 14, 
-                        fontWeight: "600", 
-                        marginBottom: 10,
-                        color: "#475569"
-                    }}>
+                    <div className={styles.leagueTitle}>
                         パシフィック・リーグ
                     </div>
-                    <div style={{ 
-                        display: "grid", 
-                        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                        gap: 10
-                    }}>
+                    <div className={styles.teamGrid}>
                         {PACIFIC_TEAMS.map((team) => (
                             <button
                                 key={team.code}
                                 onClick={() => setSelectedTeam(selectedTeam === team.code ? null : team.code)}
+                                className={`${styles.teamButton} ${selectedTeam === team.code ? styles.teamButtonSelected : ''}`}
                                 style={{ 
-                                    padding: "12px 16px",
-                                    borderRadius: 8,
                                     backgroundColor: team.color,
                                     color: team.textColor,
-                                    fontSize: 13,
-                                    fontWeight: "600",
-                                    border: selectedTeam === team.code ? "3px solid #1e293b" : "3px solid transparent",
-                                    cursor: "pointer",
-                                    transition: "all 0.2s",
-                                    boxShadow: selectedTeam === team.code ? "0 4px 8px rgba(0,0,0,0.2)" : "none",
-                                    transform: selectedTeam === team.code ? "scale(1.05)" : "scale(1)"
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = "scale(1.05)";
-                                    e.currentTarget.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (selectedTeam !== team.code) {
-                                        e.currentTarget.style.transform = "scale(1)";
-                                        e.currentTarget.style.boxShadow = "none";
-                                    }
                                 }}
                             >
-                                <div style={{ fontSize: 20, marginBottom: 4 }}>{team.code}</div>
-                                <div style={{ fontSize: 11 }}>{team.name}</div>
+                                <div className={styles.teamButtonCode}>{team.code}</div>
+                                <div className={styles.teamButtonName}>{team.name}</div>
                             </button>
                         ))}
                     </div>

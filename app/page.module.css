@@ -1,0 +1,393 @@
+.container {
+  padding: 20px;
+  font-family: system-ui;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+
+.title {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 10px;
+  color: #1a202c;
+  font-weight: bold;
+}
+
+.filterBadge {
+  text-align: center;
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #475569;
+}
+
+.teamBadge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+.clearButton {
+  margin-left: 10px;
+  padding: 6px 16px;
+  background-color: #64748b;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.calendar {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.headerCell {
+  padding: 16px;
+  color: white;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.headerSunday {
+  background-color: #ef4444;
+}
+
+.headerSaturday {
+  background-color: #3b82f6;
+}
+
+.headerWeekday {
+  background-color: #475569;
+}
+
+.calendarCell {
+  vertical-align: top;
+  border: 1px solid #e2e8f0;
+  min-height: 140px;
+  padding: 12px;
+}
+
+.cellSunday {
+  background-color: #fef2f2;
+}
+
+.cellSaturday {
+  background-color: #eff6ff;
+}
+
+.cellWeekday {
+  background-color: white;
+}
+
+.cellFiltered {
+  opacity: 0.3;
+}
+
+.dateNumber {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.dateSunday {
+  color: #dc2626;
+}
+
+.dateSaturday {
+  color: #2563eb;
+}
+
+.dateWeekday {
+  color: #1e293b;
+}
+
+.gamesContainer {
+  font-size: 12px;
+}
+
+.gameCard {
+  margin-bottom: 6px;
+  padding: 6px 8px;
+  background-color: white;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  font-size: 11px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.gameCard:hover {
+  background-color: #f8fafc;
+  border-color: #3b82f6;
+  transform: scale(1.02);
+}
+
+.gameTeam {
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 2px;
+}
+
+.gameResult {
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.gameResultActive {
+  color: #0ea5e9;
+}
+
+.gameResultCancelled {
+  color: #94a3b8;
+}
+
+.noGamesFiltered {
+  color: #cbd5e1;
+  text-align: center;
+  padding: 20px 0;
+  font-size: 11px;
+}
+
+.noGames {
+  text-align: center;
+  padding: 30px 10px;
+  font-size: 12px;
+}
+
+.noGamesIcon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  opacity: 0.3;
+}
+
+.noGamesText {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modalContent {
+  background-color: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  position: relative;
+}
+
+.modalClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: #f1f5f9;
+  border: none;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalTitle {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #1e293b;
+}
+
+.modalDate {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 24px;
+}
+
+.matchupContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 24px;
+  background-color: #f8fafc;
+  border-radius: 12px;
+}
+
+.teamContainer {
+  flex: 1;
+  text-align: center;
+}
+
+.teamLogo {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: bold;
+  border-radius: 12px;
+}
+
+.teamLogoCancelled {
+  opacity: 0.5;
+}
+
+.teamLogoWinner {
+  opacity: 1;
+}
+
+.teamLogoLoser {
+  opacity: 0.6;
+}
+
+.teamName {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.teamScore {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.scoreWinner {
+  color: #16a34a;
+}
+
+.scoreNeutral {
+  color: #64748b;
+}
+
+.winnerLabel {
+  color: #16a34a;
+  font-weight: bold;
+}
+
+.vsText {
+  font-size: 24px;
+  color: #94a3b8;
+  font-weight: bold;
+  padding: 0 20px;
+}
+
+.cancelledNotice {
+  padding: 16px;
+  background-color: #fef2f2;
+  color: #dc2626;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.drawNotice {
+  padding: 16px;
+  background-color: #f0f9ff;
+  color: #0369a1;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.hint {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 16px 20px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  font-size: 12px;
+  color: #64748b;
+}
+
+.teamSelection {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.selectionTitle {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  color: #1e293b;
+}
+
+.leagueSection {
+  margin-bottom: 20px;
+}
+
+.leagueTitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #475569;
+}
+
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.teamButton {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.teamButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.teamButtonSelected {
+  border: 3px solid #1e293b;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transform: scale(1.05);
+}
+
+.teamButtonCode {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.teamButtonName {
+  font-size: 11px;
+}
